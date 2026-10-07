@@ -63,4 +63,4 @@ app.get("/api/invoices", async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log("API running on http://localhost:3001"));
+app.listen(process.env.PORT || 3001, () => console.log("API running"));
