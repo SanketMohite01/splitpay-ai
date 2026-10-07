@@ -1,4 +1,4 @@
-const API = "http://localhost:3001";
+const API = "https://splitpay-ai.onrender.com";
 const post = (path, body) =>
   fetch(API + path, {
     method: "POST",
