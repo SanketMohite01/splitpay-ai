@@ -74,6 +74,7 @@ function verify(parsed, people) {
     shares: shares.map((s) => ({
       name: s.name,
       email: people.find((p) => p.name === s.name)?.email,
+      phone: people.find((p) => p.name === s.name)?.phone,
       amount: s.cents / 100,
     })),
   };
