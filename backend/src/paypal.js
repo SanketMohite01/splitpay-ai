@@ -75,3 +75,15 @@ export async function getInvoiceStatus(token, invoiceId) {
   if (!res.ok) throw new Error("Status error: " + JSON.stringify(data));
   return data.status;
 }
+
+export async function getPayUrl(token, invoiceId) {
+  const res = await fetch(`${BASE}/v2/invoicing/invoices/${invoiceId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error("Pay link error: " + JSON.stringify(data));
+  return (
+    data.detail?.metadata?.recipient_view_url ||
+    `https://www.sandbox.paypal.com/invoice/p/#${invoiceId}`
+  );
+}
