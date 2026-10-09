@@ -79,3 +79,41 @@ function verify(parsed, people) {
     })),
   };
 }
+
+const RECEIPT_SYSTEM = `You read receipts. Return ONLY valid JSON:
+{"merchant": string, "items": [{"name": string, "price": number}],
+ "tax": number, "tip": number, "total": number}
+Plain numbers only. Use 0 for anything missing. Each item price is the line total for that item.`;
+
+export async function scanReceipt(base64, mimeType) {
+  let lastError;
+  for (const model of MODELS) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const res = await ai.models.generateContent({
+          model,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                { inlineData: { mimeType, data: base64 } },
+                { text: "Extract the receipt." },
+              ],
+            },
+          ],
+          config: {
+            systemInstruction: RECEIPT_SYSTEM,
+            responseMimeType: "application/json",
+          },
+        });
+        return JSON.parse(res.text);
+      } catch (e) {
+        lastError = e;
+        if (e.status === 404) break;
+        if (e.status !== 503 && e.status !== 429) throw e;
+        await sleep(attempt * 3000);
+      }
+    }
+  }
+  throw lastError;
+}

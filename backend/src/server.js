@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { parseSplit } from "./ai.js";
+import { parseSplit, scanReceipt } from "./ai.js";
+import { splitByItems } from "./split.js";
 import { query } from "./db.js";
 import {
   getAccessToken,
@@ -13,7 +14,7 @@ import {
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => res.send("SplitPay AI API is running"));
 
@@ -102,6 +103,41 @@ app.post("/api/split/manual", (req, res) => {
     });
     const total = clean.reduce((sum, s) => sum + toCents(s.amount), 0) / 100;
     res.json({ description, total, paidBy: paidBy || null, shares: clean });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+// ---------- Receipt photo: Gemini reads the items (nothing is sent) ----------
+app.post("/api/receipt/scan", async (req, res) => {
+  try {
+    const { imageBase64, mimeType } = req.body;
+    if (!imageBase64)
+      return res.status(400).json({ error: "imageBase64 is required" });
+    res.json(await scanReceipt(imageBase64, mimeType || "image/jpeg"));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// ---------- Split by items: who had what (nothing is sent) ----------
+app.post("/api/split/items", (req, res) => {
+  try {
+    const { description, paidBy, items, tax, tip, people } = req.body;
+    const owed = splitByItems({ items, tax, tip });
+    const shares = Object.entries(owed).map(([name, c]) => {
+      const p = (people || []).find((x) => x.name === name) || {};
+      if (name !== paidBy && !p.email)
+        throw new Error(`${name} needs an email`);
+      return { name, email: p.email, phone: p.phone || null, amount: c / 100 };
+    });
+    const total =
+      Math.round(shares.reduce((s, x) => s + x.amount * 100, 0)) / 100;
+    res.json({
+      description: description || "Receipt",
+      total,
+      paidBy: paidBy || null,
+      shares,
+    });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
