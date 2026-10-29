@@ -12,7 +12,7 @@ Built for the **PayPal AI Hackathon** on Devpost. Everything runs in the **PayPa
 
 |             |                                  |
 | ----------- | -------------------------------- |
-| Live demo   | [FRONTEND URL]                   |
+| Live demo   |https://splitpay-ai-app.onrender.com/
 | Demo video  | [YOUTUBE LINK]                   |
 | Backend API | https://splitpay-ai.onrender.com |
 | Devpost     | [DEVPOST LINK]                   |
@@ -185,10 +185,8 @@ By default the app talks to the hosted API. To use your local API, create `front
 ## Team
 
 - **Sanket Mohite** ([@SanketMohite01](https://github.com/SanketMohite01)): backend, PayPal and AI integration, database, deployment
-- **[TEAMMATE FULL NAME]** ([@Tejasvii09](https://github.com/Tejasvii09)): frontend
+- **Tejasvii** ([@Tejasvii09](https://github.com/Tejasvii09)): frontend
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-Claude finished the response
