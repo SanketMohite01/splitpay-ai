@@ -1,5 +1,21 @@
-import { money } from "../components";
-export default function ReceiptForm({ receipt, setReceipt, assign, setAssign, allNames, toggleAssign, onFile, onGo }) {
+import { Avatar, money } from "../components";
+
+export default function ReceiptForm({ receipt, setReceipt, assign, setAssign, allNames, contacts, toggleAssign, onFile, onGo }) {
+  const byName = new Map((contacts || []).map((c) => [c.name, c]));
+
+  const personChip = (label, { id, active, onClick, ariaLabel }) => (
+    <button
+      type="button"
+      aria-pressed={active}
+      aria-label={ariaLabel || label}
+      className={"chip-person" + (active ? " active" : "")}
+      onClick={onClick}
+    >
+      <Avatar name={label} id={id} size="sm" selected={active} />
+      <span className="chip-person__label">{label}</span>
+    </button>
+  );
+
   if (!receipt) {
     return (
       <div className="card stack">
@@ -17,21 +33,43 @@ export default function ReceiptForm({ receipt, setReceipt, assign, setAssign, al
       <div className="muted">Tap names to share an item between people.</div>
       {receipt.items.map((it, i) => (
         <div key={i} className="item col">
-          <div className="row between"><span>{it.name}</span><span className="amount">{money(it.price)}</span></div>
+          <div className="row between">
+            <span>{it.name}</span>
+            <span className="amount">{money(it.price)}</span>
+          </div>
           <div className="chips">
-            <button type="button" className="chip" onClick={() => setAssign({ ...assign, [i]: allNames })}>Everyone</button>
-            {allNames.map((n) => (
-              <button type="button" key={n} className={"chip" + ((assign[i] || []).includes(n) ? " active" : "")} onClick={() => toggleAssign(i, n)}>{n}</button>
-            ))}
+            {personChip("Everyone", {
+              id: "__everyone__",
+              active: (assign[i] || []).length === allNames.length && allNames.length > 0,
+              onClick: () => setAssign({ ...assign, [i]: allNames }),
+            })}
+            {allNames.map((n) => {
+              const on = (assign[i] || []).includes(n);
+              return (
+                <span key={n}>
+                  {personChip(n, {
+                    id: byName.get(n)?.id,
+                    active: on,
+                    onClick: () => toggleAssign(i, n),
+                  })}
+                </span>
+              );
+            })}
           </div>
         </div>
       ))}
       <div className="row">
-        <div className="grow"><label className="label">Tax</label><input className="input" inputMode="decimal" value={receipt.tax} onChange={(e) => setReceipt({ ...receipt, tax: e.target.value })} /></div>
-        <div className="grow"><label className="label">Tip</label><input className="input" inputMode="decimal" value={receipt.tip} onChange={(e) => setReceipt({ ...receipt, tip: e.target.value })} /></div>
+        <div className="grow">
+          <label className="label" htmlFor="rc-tax">Tax</label>
+          <input id="rc-tax" className="input" inputMode="decimal" value={receipt.tax} onChange={(e) => setReceipt({ ...receipt, tax: e.target.value })} />
+        </div>
+        <div className="grow">
+          <label className="label" htmlFor="rc-tip">Tip</label>
+          <input id="rc-tip" className="input" inputMode="decimal" value={receipt.tip} onChange={(e) => setReceipt({ ...receipt, tip: e.target.value })} />
+        </div>
       </div>
-      <button className="btn btn-primary" onClick={onGo}>Calculate split</button>
-      <button className="btn btn-ghost" onClick={() => setReceipt(null)}>Scan a different receipt</button>
+      <button type="button" className="btn btn-primary" onClick={onGo}>Preview split</button>
+      <button type="button" className="btn btn-ghost" onClick={() => setReceipt(null)}>Scan a different receipt</button>
     </div>
   );
 }

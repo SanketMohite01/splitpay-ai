@@ -37,10 +37,25 @@ h2{font-size:20px;margin:0 0 10px;letter-spacing:-.3px}
 .input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
 textarea.input{min-height:100px;resize:vertical}
 .amount-input{width:110px}
-.avatar{border-radius:50%;background:var(--navy2);color:#fff;display:grid;place-items:center;font-weight:700;flex:none;width:40px;height:40px}
+.avatar{position:relative;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:700;flex:none;line-height:1}
+.avatar-sm{width:28px;height:28px;font-size:11px}
+.avatar-md{width:40px;height:40px;font-size:16px}
+.avatar-lg{width:56px;height:56px;font-size:22px}
+.avatar-check{position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;border:2px solid #fff;box-sizing:content-box}
+.avatar-sm .avatar-check{width:14px;height:14px;right:-3px;bottom:-3px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-weight:600}
 .chip.active{border-color:var(--blue);background:#eaf0ff;color:var(--navy)}
+.chip-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:10px;font-size:14px}
+.chip-toolbar .linkbtn{background:none;border:0;padding:6px 4px;color:var(--blue);font-weight:700;min-height:44px}
+.chip-person{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font-weight:600;min-height:44px;max-width:100%}
+.chip-person.active{border-color:var(--blue);background:#eaf0ff;color:var(--navy)}
+.chip-person__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:160px;text-align:left}
+.contact-email{overflow-wrap:anywhere;word-break:break-word}
+.field-error{color:var(--red);font-size:13px;margin-top:4px}
+.field-warn{color:var(--amber);font-size:13px;margin-top:4px}
+.iconbtn-hit{min-width:44px;min-height:44px}
+.error-card{text-align:center;padding:20px 12px}
 .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700}
 .badge.paid{background:var(--greenbg);color:var(--green)}.badge.wait{background:var(--amberbg);color:var(--amber)}
 .segmented{display:flex;background:#e6eaf2;border-radius:12px;padding:3px;margin-bottom:12px}

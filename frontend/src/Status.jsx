@@ -8,12 +8,19 @@ const sum = (a) => a.reduce((s, i) => s + Number(i.amount || 0), 0);
 
 export default function Status({ notify }) {
   const [items, setItems] = useState(null);
+  const [loadErr, setLoadErr] = useState("");
   const [filter, setFilter] = useState("all");
 
   const load = useCallback(async () => {
     setItems(null);
-    try { setItems((await getInvoices()) || []); }
-    catch (e) { notify(e.message, "error"); setItems([]); }
+    setLoadErr("");
+    try {
+      setItems((await getInvoices()) || []);
+    } catch (e) {
+      notify(e.message, "error");
+      setLoadErr(e.message);
+      setItems([]);
+    }
   }, [notify]);
   useEffect(() => { load(); }, [load]);
 
@@ -27,7 +34,14 @@ export default function Status({ notify }) {
         <h2 style={{ margin: 0 }}>Status</h2>
         <button className="btn btn-ghost btn-sm" onClick={load}><RefreshIcon s={16} /> Refresh</button>
       </div>
-      {items === null ? <Skeleton /> : (
+      {items === null ? (
+        <Skeleton />
+      ) : loadErr ? (
+        <div className="card error-card">
+          <p className="muted">Could not load invoices. {loadErr}</p>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={load}>Retry</button>
+        </div>
+      ) : (
         <>
           <div className="card">
             <div className="muted">Total requested</div>
@@ -44,7 +58,13 @@ export default function Status({ notify }) {
           {shown.map((i, n) => (
             <div className="card" key={i.invoiceId || i.id || n}>
               <div className="row between">
-                <div className="row"><Avatar name={i.name || i.email} /><div><b>{i.name || i.email}</b><div className="muted">{money(i.amount)}</div></div></div>
+                <div className="row">
+                  <Avatar name={i.name || i.email} id={i.email || i.name} size="md" />
+                  <div>
+                    <b>{i.name || i.email}</b>
+                    <div className="muted">{money(i.amount)}</div>
+                  </div>
+                </div>
                 <Badge paid={isPaid(i)} />
               </div>
               {!isPaid(i) && <PayActions inv={i} />}

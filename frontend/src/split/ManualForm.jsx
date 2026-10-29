@@ -8,12 +8,12 @@ export default function ManualForm({ chosen, description, setDescription, amount
       </div>
       {chosen.length === 0 ? <div className="empty">Pick people above.</div> : chosen.map((c) => (
         <div className="row" key={c.id}>
-          <Avatar name={c.name} size={36} />
+          <Avatar name={c.name} id={c.id} size="md" />
           <div className="grow"><strong>{c.name}</strong></div>
           <input className="input amount-input" inputMode="decimal" placeholder="0.00" aria-label={`Amount for ${c.name}`} value={amounts[c.id] || ""} onChange={(e) => setAmounts({ ...amounts, [c.id]: e.target.value })} />
         </div>
       ))}
-      <button className="btn btn-primary" onClick={onGo}>Preview split</button>
+      <button type="button" className="btn btn-primary" onClick={onGo}>Preview split</button>
     </div>
   );
 }
