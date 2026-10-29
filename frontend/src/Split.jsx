@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { aiSplit, manualSplit, scanReceipt, splitByItems, sendInvoices, resizeImage } from "./api";
-import { Loading } from "./components";
+import { Avatar, Loading } from "./components";
+import { SearchIcon } from "./Icons";
 import Stepper from "./split/Stepper";
 import DescribeForm from "./split/DescribeForm";
 import ManualForm from "./split/ManualForm";
@@ -13,9 +14,10 @@ const MODES = [
   { id: "receipt", label: "Receipt" },
 ];
 
-export default function Split({ contacts, notify, me, openSettings, goStatus }) {
+export default function Split({ contacts, notify, me, openSettings, goStatus, goContacts }) {
   const [mode, setMode] = useState("ai");
   const [selected, setSelected] = useState([]);
+  const [pickerQ, setPickerQ] = useState("");
   const [message, setMessage] = useState("");
   const [description, setDescription] = useState("");
   const [amounts, setAmounts] = useState({});
@@ -25,12 +27,19 @@ export default function Split({ contacts, notify, me, openSettings, goStatus }) 
   const [sent, setSent] = useState(null);
   const [busy, setBusy] = useState("");
 
+  const contactByName = useMemo(() => {
+    const m = new Map(contacts.map((c) => [c.name, c]));
+    return (name) => m.get(name);
+  }, [contacts]);
   const chosen = useMemo(() => contacts.filter((c) => selected.includes(c.id)), [contacts, selected]);
   const myName = me.trim() || "Me";
   const people = [{ name: myName }, ...chosen.map(({ name, email, phone }) => ({ name, email, phone }))];
   const allNames = people.map((p) => p.name);
 
   const toggle = (id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  const pickerList = contacts.filter((c) => c.name.toLowerCase().includes(pickerQ.toLowerCase()));
+  const selectAll = () => setSelected(contacts.map((c) => c.id));
+  const clearAll = () => setSelected([]);
   const toggleAssign = (i, name) =>
     setAssign((a) => {
       const cur = a[i] || [];
@@ -90,20 +99,57 @@ export default function Split({ contacts, notify, me, openSettings, goStatus }) 
     });
 
   if (busy) return <Loading text={busy} />;
-  if (sent) return <Sent sent={sent} onReset={() => { reset(); goStatus(); }} />;
-  if (preview) return (<><Stepper step={2} /><Review preview={preview} myName={myName} onSend={doSend} onBack={() => setPreview(null)} /></>);
+  if (sent) return <Sent sent={sent} contactByName={contactByName} onReset={() => { reset(); goStatus(); }} />;
+  if (preview) return (<><Stepper step={2} /><Review preview={preview} myName={myName} contactByName={contactByName} onSend={doSend} onBack={() => setPreview(null)} /></>);
 
   return (
     <div>
       <Stepper step={chosen.length ? 1 : 0} />
       <div className="card">
         <h2>Who is splitting?</h2>
-        {contacts.length === 0 ? <div className="empty">Add friends in the Contacts tab first.</div> : (
-          <div className="chips">
-            {contacts.map((c) => (
-              <button type="button" key={c.id} aria-pressed={selected.includes(c.id)} className={"chip" + (selected.includes(c.id) ? " active" : "")} onClick={() => toggle(c.id)}>{c.name}</button>
-            ))}
+        {contacts.length === 0 ? (
+          <div className="empty">
+            <p>Add friends in Contacts so you can split with them.</p>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={goContacts}>Go to Contacts</button>
           </div>
+        ) : (
+          <>
+            <div className="chip-toolbar">
+              <span className="muted">{selected.length} selected</span>
+              <button type="button" className="linkbtn" onClick={selectAll}>Select all</button>
+              <button type="button" className="linkbtn" onClick={clearAll}>Clear</button>
+            </div>
+            {contacts.length > 6 && (
+              <div className="search">
+                <SearchIcon s={18} />
+                <input
+                  className="input"
+                  placeholder="Search people"
+                  aria-label="Search people to split with"
+                  value={pickerQ}
+                  onChange={(e) => setPickerQ(e.target.value)}
+                />
+              </div>
+            )}
+            <div className="chips">
+              {pickerList.map((c) => {
+                const on = selected.includes(c.id);
+                return (
+                  <button
+                    type="button"
+                    key={c.id}
+                    aria-pressed={on}
+                    className={"chip-person" + (on ? " active" : "")}
+                    onClick={() => toggle(c.id)}
+                  >
+                    <Avatar name={c.name} id={c.id} size="sm" selected={on} />
+                    <span className="chip-person__label">{c.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {pickerList.length === 0 && pickerQ && <div className="muted">No one matches that search.</div>}
+          </>
         )}
         <p className="muted" style={{ marginBottom: 0 }}>
           Paid by <b>{myName}</b>. <button type="button" className="btn btn-ghost btn-sm" style={{ display: "inline-flex", padding: "2px 6px" }} onClick={openSettings}>Change name</button>
@@ -114,7 +160,19 @@ export default function Split({ contacts, notify, me, openSettings, goStatus }) 
       </div>
       {mode === "ai" && <DescribeForm message={message} setMessage={setMessage} onGo={doAi} />}
       {mode === "manual" && <ManualForm chosen={chosen} description={description} setDescription={setDescription} amounts={amounts} setAmounts={setAmounts} onGo={doManual} />}
-      {mode === "receipt" && <ReceiptForm receipt={receipt} setReceipt={setReceipt} assign={assign} setAssign={setAssign} allNames={allNames} toggleAssign={toggleAssign} onFile={onFile} onGo={doReceipt} />}
+      {mode === "receipt" && (
+        <ReceiptForm
+          receipt={receipt}
+          setReceipt={setReceipt}
+          assign={assign}
+          setAssign={setAssign}
+          allNames={allNames}
+          contacts={contacts}
+          toggleAssign={toggleAssign}
+          onFile={onFile}
+          onGo={doReceipt}
+        />
+      )}
     </div>
   );
 }

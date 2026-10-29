@@ -2,11 +2,62 @@ import { useEffect, useState } from "react";
 import { CheckIcon, ClockIcon } from "./Icons";
 
 export const money = (n) => `$${Number(n || 0).toFixed(2)}`;
-export const initials = (n = "?") =>
-  String(n).trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
-export function Avatar({ name, size = 40 }) {
-  return <div className="avatar" style={{ width: size, height: size, fontSize: size * 0.4 }}>{initials(name)}</div>;
+const AVATAR_COLORS = ["#1f3560", "#2d5bd6", "#17824f", "#5b21b6", "#0f766e", "#9a3412", "#9f1239", "#3730a3"];
+
+const wordChar = (w) => {
+  const m = String(w).match(/\p{L}/u);
+  return m ? m[0] : String(w)[0] || "";
+};
+
+export function getInitials(n = "?") {
+  const words = String(n).trim().split(/\s+/).filter((w) => w && !/^\d+$/.test(w));
+  if (words.length === 0) return "?";
+  if (words.length === 1) {
+    const c = wordChar(words[0]);
+    return c ? c.toUpperCase() : "?";
+  }
+  const pair = wordChar(words[0]) + wordChar(words[words.length - 1]);
+  return pair ? pair.toUpperCase() : "?";
+}
+
+export const initials = getInitials;
+
+export function getAvatarColorKey(id, name) {
+  if (id != null && id !== "") return String(id);
+  return String(name || "").trim().toLowerCase();
+}
+
+function hashString(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+export function getAvatarColor(id, name) {
+  const key = getAvatarColorKey(id, name);
+  if (!key) return AVATAR_COLORS[0];
+  return AVATAR_COLORS[hashString(key) % AVATAR_COLORS.length];
+}
+
+const AVATAR_PX = { sm: 28, md: 40, lg: 56 };
+
+export function Avatar({ name, id, size = "md", selected = false }) {
+  const px = AVATAR_PX[size] || AVATAR_PX.md;
+  return (
+    <span
+      className={`avatar avatar-${size}${selected ? " avatar-has-check" : ""}`}
+      style={{ backgroundColor: getAvatarColor(id, name), fontSize: px * 0.4 }}
+      aria-hidden="true"
+    >
+      {getInitials(name)}
+      {selected && (
+        <span className="avatar-check">
+          <CheckIcon s={size === "sm" ? 10 : 12} />
+        </span>
+      )}
+    </span>
+  );
 }
 export function Badge({ paid }) {
   return paid
