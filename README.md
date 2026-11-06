@@ -13,9 +13,9 @@ Built for the **PayPal AI Hackathon** on Devpost. Everything runs in the **PayPa
 |             |                                  |
 | ----------- | -------------------------------- |
 | Live demo   |https://splitpay-ai-app.onrender.com/
-| Demo video  | [YOUTUBE LINK]                   |
+| Demo video  |https://youtu.be/z81vGWF-Bd8             |
 | Backend API | https://splitpay-ai.onrender.com |
-| Devpost     | [DEVPOST LINK]                   |
+| Devpost     | https://devpost.com/software/splitpay-ai-ezo5ly                 |
 
 > **Note for testers:** the free servers sleep when idle, so the first request can take up to a minute. Open the backend URL once to wake it. Test login details for the PayPal sandbox are in the Devpost "testing instructions", not in this repository.
 
@@ -185,7 +185,7 @@ By default the app talks to the hosted API. To use your local API, create `front
 ## Team
 
 - **Sanket Mohite** ([@SanketMohite01](https://github.com/SanketMohite01)): backend, PayPal and AI integration, database, deployment
-- **Tejasvii** ([@Tejasvii09](https://github.com/Tejasvii09)): frontend
+- **Tejasvii** ([@Tejasvii09](https://github.com/Tejasvii09)): Full-stack developer, led the frontend UI and connected it to the backend APIs
 
 ## License
 
