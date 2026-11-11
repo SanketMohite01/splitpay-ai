@@ -1,7 +1,3 @@
-Claude
-
-Readme · MD
-
 # SplitPay AI
 
 **Split bills with AI. Get paid with PayPal.**
